@@ -1,5 +1,11 @@
 # Differant
 
+A small library for diffing related codebases.
+
+Uses a `.differant.conf` file in HOCON to highlight expected differences.
+
+Work in progress, use at your own risk.
+
 ## TODO
 
 * [X] implement ignored files, preferably with explanations

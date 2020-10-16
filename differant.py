@@ -34,7 +34,7 @@ def dirdiff(directory, override=False):
     shutil.rmtree(derived+'/.differant.conf', ignore_errors=True)
     for i, reason in conf['ignore'].items():
         # this is only applicable to Linux!
-        if i[0] == '/' or i.find('..') != -1:
+        if os.path.isabs(i) or i.find('..') != -1:
             print(f'Nice try. Ignoring directory {i}, please do not use absolute paths and parent folders.')
             continue
         print(f"Removing {i}, reason: {reason}")

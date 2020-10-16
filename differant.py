@@ -2,7 +2,7 @@
 
 # for now assuming the 'derived' repo is just checked out
 
-import fire, pyhocon, git, os, shutil, sys, pathlib
+import fire, pyhocon, git, os, shutil, sys, pathlib, subprocess, unidiff
 
 def dirdiff(directory, override=False):
     "Either a function to diff directories, or a city in Northwest England, close to Dirham and Dirwick."
@@ -40,6 +40,13 @@ def dirdiff(directory, override=False):
         print(f"Removing {i}, reason: {reason}")
         shutil.rmtree(upstream+'/'+i, ignore_errors=True)
         shutil.rmtree(derived+'/'+i, ignore_errors=True)
+
+    # let's diff the dirs now, and parse this into a Python patchset object
+    result = subprocess.run(f"git diff --no-index {upstream} {derived}".split(' '), stdout=subprocess.PIPE)
+    result_output = result.stdout.decode('utf-8')
+    patchset = unidiff.PatchSet(result_output)
+    for p in patchset:
+        print(f"Patch with {p.added} added lines and {p.removed} removed lines")
 
 if __name__ == '__main__':
     fire.Fire(dirdiff)

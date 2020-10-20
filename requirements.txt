@@ -1,4 +1,4 @@
 fire
-pyhocon
+pyyaml
 gitpython
 unidiff

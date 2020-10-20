@@ -14,8 +14,11 @@ Work in progress, use at your own risk.
 * [ ] switch from deleting files to operation on diffs
   * [X] generate a diff file
   * [X] use python-unidiff to parse diff file
-  * [ ] use it to find most obvious changes that should be ignored and add to ignore list
-  * [ ] find how many files only have a one-liner change
-  * [ ] mark and detect refactorizations and ignore/group them
-  * [ ] categorize changes
+  * [X] mark and detect refactorizations and ignore/group them
+  * [ ] categorize changes - refactors vs uncategorized, perhaps just as patchset metadata
+  * [ ] find more obvious refactors
+  * [ ] from uncategorized, sort them by amount of changes
   * [ ] generate a nice summary of it all
+  * [ ] enable to generate subdiffs
+  * [ ] explore if we can add metadata to diffs
+  * [ ] find/write a good diff viewer

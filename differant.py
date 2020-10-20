@@ -2,7 +2,7 @@
 
 # for now assuming the 'derived' repo is just checked out
 
-import fire, pyhocon, git, os, shutil, sys, pathlib, subprocess, unidiff
+import fire, yaml, git, os, shutil, sys, pathlib, subprocess, unidiff
 
 def dirdiff(directory, override=False):
     "Either a function to diff directories, or a city in Northwest England, close to Dirham and Dirwick."
@@ -14,8 +14,11 @@ def dirdiff(directory, override=False):
     if abspath in pathlib.Path(os.getcwd()).parents or abspath == os.getcwd():
         print("Please do not call dirdiff from inside of the target directory.")
         sys.exit(1)
-    configfile = directory + '/.differant.conf'
-    conf = pyhocon.ConfigFactory.parse_file(configfile)
+
+    f = open(directory + '/.differant.yml', 'r')
+    conf = yaml.safe_load(f)
+    f.close()
+
     print(conf)
     upstream = directory + '-upstream'
     derived = directory + '-derived'
@@ -30,23 +33,55 @@ def dirdiff(directory, override=False):
         shutil.copytree(directory, f'{directory}-derived')
     else:
         print(f"Skipping copy, derived directory {derived} exists.")
-    shutil.rmtree(upstream+'/.differant.conf', ignore_errors=True)
-    shutil.rmtree(derived+'/.differant.conf', ignore_errors=True)
-    for i, reason in conf['ignore'].items():
+    for path in ['.differant.conf', '.git']:
+        shutil.rmtree(upstream+'/'+path, ignore_errors=True)
+        shutil.rmtree(derived+'/'+path, ignore_errors=True)
+    for i in conf['ignores']:
+        what, why = i['what'], i['why']
         # this is only applicable to Linux!
-        if os.path.isabs(i) or i.find('..') != -1:
-            print(f'Nice try. Ignoring directory {i}, please do not use absolute paths and parent folders.')
+        if os.path.isabs(what) or what.find('..') != -1:
+            print(f'Nice try. Ignoring directory {what}, please do not use absolute paths and parent folders.')
             continue
-        print(f"Removing {i}, reason: {reason}")
-        shutil.rmtree(upstream+'/'+i, ignore_errors=True)
-        shutil.rmtree(derived+'/'+i, ignore_errors=True)
+        print(f"Removing {what}, reason: {why}")
+        shutil.rmtree(upstream+'/'+what, ignore_errors=True)
+        shutil.rmtree(derived+'/'+what, ignore_errors=True)
 
     # let's diff the dirs now, and parse this into a Python patchset object
     result = subprocess.run(f"git diff --no-index {upstream} {derived}".split(' '), stdout=subprocess.PIPE)
     result_output = result.stdout.decode('utf-8')
     patchset = unidiff.PatchSet(result_output)
+
+    refactors = conf['refactors']
+
     for p in patchset:
-        print(f"Patch with {p.added} added lines and {p.removed} removed lines")
+        if p.added == 0 and p.removed == 0:
+            print("Empty patch:")
+            print(p)
+        elif check_if_refactor(p, refactors):
+            print("Refactor patch.")
+        else:
+            print(f"Patch with {p.added} added lines and {p.removed} removed lines")
+            for hunk in p:
+                print("Added:")
+                for line in [x for x in hunk if x.line_type == unidiff.LINE_TYPE_ADDED]:
+                    print(line.value.rstrip())
+                print("Removed:")
+                for line in [x for x in hunk if x.line_type == unidiff.LINE_TYPE_REMOVED]:
+                    print(line.value.rstrip())
+
+def check_if_refactor(patch, refactors):
+    for hunk in patch:
+        added = "".join([str(x)[1:] for x in hunk if x.line_type == unidiff.LINE_TYPE_ADDED])
+        removed = "".join([str(x)[1:] for x in hunk if x.line_type == unidiff.LINE_TYPE_REMOVED])
+        after_refactor = removed
+        for r in refactors:
+            r_from, r_to = r['from'], r['to']
+            after_refactor = after_refactor.replace(r_from, r_to)
+        if added == after_refactor:
+            print("Lines equal after applying refactors.")
+        else:
+            return False
+    return True
 
 if __name__ == '__main__':
     fire.Fire(dirdiff)

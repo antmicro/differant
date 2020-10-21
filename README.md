@@ -15,10 +15,10 @@ Work in progress, use at your own risk.
   * [X] generate a diff file
   * [X] use python-unidiff to parse diff file
   * [X] mark and detect refactorizations and ignore/group them
-  * [ ] categorize changes - refactors vs uncategorized, perhaps just as patchset metadata
-  * [ ] find more obvious refactors
-  * [ ] from uncategorized, sort them by amount of changes
+  * [X] categorize changes - refactors vs uncategorized
+  * [X] from uncategorized, sort them by amount of changes
   * [ ] generate a nice summary of it all
+  * [ ] find more obvious refactors
   * [ ] enable to generate subdiffs
   * [ ] explore if we can add metadata to diffs
-  * [ ] find/write a good diff viewer
+  * [ ] find/write a good diff viewer that perhaps uses this metadata

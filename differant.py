@@ -54,11 +54,14 @@ def dirdiff(directory, override=False):
     refactors = conf['refactors']
 
     for p in patchset:
+        p.refactors = set()
+        p.only_refactors = False
         if p.added == 0 and p.removed == 0:
             print("Empty patch:")
             print(p)
         elif check_if_refactor(p, refactors):
-            print("Refactor patch.")
+            print("Patch which only includes known refactors.")
+            p.refactors = [dict(x) for x in p.refactors]
         else:
             print(f"Patch with {p.added} added lines and {p.removed} removed lines")
             for hunk in p:
@@ -69,18 +72,31 @@ def dirdiff(directory, override=False):
                 for line in [x for x in hunk if x.line_type == unidiff.LINE_TYPE_REMOVED]:
                     print(line.value.rstrip())
 
+    def get_size(patch):
+        return patch.added + patch.removed
+
+    l = sorted(patchset, key=get_size, reverse=True)
+
+    for p in l:
+        print(p.only_refactors, p.refactors, p.added, p.removed)
+
+
 def check_if_refactor(patch, refactors):
     for hunk in patch:
         added = "".join([str(x)[1:] for x in hunk if x.line_type == unidiff.LINE_TYPE_ADDED])
         removed = "".join([str(x)[1:] for x in hunk if x.line_type == unidiff.LINE_TYPE_REMOVED])
         after_refactor = removed
         for r in refactors:
+            was_added = False
             r_from, r_to = r['from'], r['to']
-            after_refactor = after_refactor.replace(r_from, r_to)
+            if after_refactor.find(r_from) != -1:
+                patch.refactors.add(tuple(r.items()))
+                after_refactor = after_refactor.replace(r_from, r_to)
         if added == after_refactor:
             print("Lines equal after applying refactors.")
         else:
             return False
+    patch.only_refactors = True
     return True
 
 if __name__ == '__main__':

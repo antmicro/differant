@@ -130,7 +130,7 @@ class DiffingHandler(FileSystemEventHandler):
         self.directory = directory
     def on_modified(self, event):
         if event.src_path == f"{self.directory}/{conf_file}":
-            print(bold_yellow('Change in {conf_file} detected, rerunning dirdiff again!'))
+            print(bold_yellow(f'Change in {conf_file} detected, rerunning dirdiff again!'))
             dirdiff(self.directory)
             print(bold_yellow('Continuing to watch for changes...'))
 

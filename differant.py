@@ -50,35 +50,59 @@ def dirdiff(directory: str):
     result_output = result.stdout.decode('utf-8')
     patchset = unidiff.PatchSet(result_output)
 
-    refactors = conf['refactors']
+    refactors = conf.get('refactors', [])#['refactors']
+    known = conf.get('known_changes', [])#['known_changes'] if 'known'or []
+
+    # create empty arrays to store associated patches
+    for r in refactors:
+        r['patches'] = []
+    for k in known:
+        k['patches'] = []
+
+    remaining = []
 
     for p in patchset:
-        p.refactors = set()
         p.only_refactors = False
+        p.empty = False
+        p.known = None
         if p.added == 0 and p.removed == 0:
-            print("Empty patch:")
-            print(p)
-        elif check_if_refactor(p, refactors):
-            print("Patch which only includes known refactors.")
-            p.refactors = [dict(x) for x in p.refactors]
+            p.empty = True
         else:
-            print(f"Patch with {p.added} added lines and {p.removed} removed lines")
-            for hunk in p:
-                print("Added:")
-                for line in [x for x in hunk if x.line_type == unidiff.LINE_TYPE_ADDED]:
-                    print(line.value.rstrip())
-                print("Removed:")
-                for line in [x for x in hunk if x.line_type == unidiff.LINE_TYPE_REMOVED]:
-                    print(line.value.rstrip())
+            check_if_refactor(p, refactors)
+        check_if_known(p, known, directory)
+
+        if not p.known and not p.empty and not p.only_refactors:
+            remaining.append(p)
+        #print("Patch which only includes known refactors.")
+        #p.refactors = [dict(x) for x in p.refactors]
 
     def get_size(patch):
         return patch.added + patch.removed
 
-    l = sorted(patchset, key=get_size, reverse=True)
+    known_patches = [p for p in patchset if p.known]
+    refactor_only_patches = [p for p in patchset if p.only_refactors]
+    empty_patches = [p for p in patchset if p.empty]
 
-    for p in l:
-        print(p.only_refactors, p.refactors, p.added, p.removed)
+    l = sorted(remaining, key=get_size, reverse=True)
+    print("\n".join([str(p) for p in l]))
 
+    print(f"{len(known_patches)} known patches.")
+    print(f"{len(refactor_only_patches)} refactor only patches.")
+    print(f"{len(empty_patches)} empty_patches.")
+    print(f"{len(remaining)} patches remain.")
+
+
+from fnmatch import fnmatch
+def check_if_known(patch, known, directory):
+    for k in known:
+        for f in k['files']:
+            src = patch.source_file[2:].replace(directory+'-upstream/', '')
+            tgt = patch.target_file[2:].replace(directory+'-derived/', '')
+            if fnmatch(src, f) or fnmatch(tgt, f):
+                k['patches'].append(patch)
+                patch.known = k['change']
+                return True
+    return False
 
 def check_if_refactor(patch, refactors):
     for hunk in patch:
@@ -89,10 +113,10 @@ def check_if_refactor(patch, refactors):
             was_added = False
             r_from, r_to = r['from'], r['to']
             if after_refactor.find(r_from) != -1:
-                patch.refactors.add(tuple(r.items()))
+                r['patches'].append(patch)
                 after_refactor = after_refactor.replace(r_from, r_to)
         if added == after_refactor:
-            print("Lines equal after applying refactors.")
+            pass # print("Lines equal after applying refactors.")
         else:
             return False
     patch.only_refactors = True

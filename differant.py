@@ -13,17 +13,21 @@ def dirdiff(directory: str):
 
     upstream = directory + '-upstream'
     derived = directory + '-derived'
+
     if not os.path.isdir(upstream):
         repo = git.Repo.clone_from(conf['upstream'], upstream, depth=1, branch=conf['tag'])
     else:
         print(f"Skipping clone, upstream directory {upstream} exists.")
+
     if not os.path.isdir(derived):
         shutil.copytree(directory, derived)
     else:
         print(f"Skipping copy, derived directory {derived} exists.")
+
     for path in ['.differant.yml', '.git']:
         shutil.rmtree(upstream+'/'+path, ignore_errors=True)
         shutil.rmtree(derived+'/'+path, ignore_errors=True)
+
     for i in conf['ignores']:
         what, why = i['what'], i['why']
         # this is only applicable to Linux!
@@ -99,19 +103,24 @@ class DiffingHandler(FileSystemEventHandler):
         print(f'event type: {event.event_type}  path : {event.src_path}')
 
 def watch(directory: str, override: bool = False):
+
     if not shutil.rmtree.avoids_symlink_attacks:
         print("Sorry, but your system is susceptible to symlink attacks. Consider switching. Exiting.")
         sys.exit(1)
+
     directory = directory.rstrip('/')
     abspath = os.path.abspath(directory)
     if abspath in pathlib.Path(os.getcwd()).parents or abspath == os.getcwd():
         print("Please do not call dirdiff from inside of the target directory.")
         sys.exit(1)
+
     upstream = directory + '-upstream'
     derived = directory + '-derived'
+
     if override == True:
         shutil.rmtree(upstream)
         shutil.rmtree(derived)
+
     observer = Observer()
     observer.schedule(DiffingHandler(directory), path=directory, recursive=True)
     observer.start()

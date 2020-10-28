@@ -5,7 +5,7 @@
 import fire, yaml, git, os, shutil, sys, pathlib, subprocess, unidiff, time, logging
 
 def dirdiff(directory: str):
-    "Either a function to diff directories, or a city in Northwest England, close to Dirham and Dirwick."
+    "Either a function to diff directories, or a city in Wales, close to Dirham and Dirwick."
 
     f = open(directory + '/.differant.yml', 'r')
     conf = yaml.safe_load(f)

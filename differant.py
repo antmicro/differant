@@ -4,6 +4,11 @@
 
 import fire, yaml, git, os, shutil, sys, pathlib, subprocess, unidiff, time, logging
 
+from neotermcolor import colored
+
+def bold_yellow(text):
+    return colored(text, color='yellow', attrs='bold')
+
 def dirdiff(directory: str):
     "Either a function to diff directories, or a city in Wales, close to Dirham and Dirwick."
 
@@ -99,8 +104,9 @@ class DiffingHandler(FileSystemEventHandler):
         self.directory = directory
     def on_modified(self, event):
         if event.src_path == self.directory + "/.differant.yml":
-            dirdiff(event.src_parh)
-        print(f'event type: {event.event_type}  path : {event.src_path}')
+            print(bold_yellow('Change in conf file detected, rerunning dirdiff again!'))
+            dirdiff(self.directory)
+            print(bold_yellow('Continuing to watch for changes...'))
 
 def watch(directory: str, override: bool = False):
 
@@ -121,6 +127,9 @@ def watch(directory: str, override: bool = False):
         shutil.rmtree(upstream)
         shutil.rmtree(derived)
 
+    print(bold_yellow('Running dirdiff.'))
+    dirdiff(directory)
+    print(f'Starting to watch {bold_yellow(directory+"/.differant.yml")} for changes...')
     observer = Observer()
     observer.schedule(DiffingHandler(directory), path=directory, recursive=True)
     observer.start()

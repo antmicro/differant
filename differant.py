@@ -33,7 +33,7 @@ def dirdiff(directory, override=False):
         shutil.copytree(directory, derived)
     else:
         print(f"Skipping copy, derived directory {derived} exists.")
-    for path in ['.differant.conf', '.git']:
+    for path in ['.differant.yml', '.git']:
         shutil.rmtree(upstream+'/'+path, ignore_errors=True)
         shutil.rmtree(derived+'/'+path, ignore_errors=True)
     for i in conf['ignores']:

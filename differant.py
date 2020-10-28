@@ -30,7 +30,7 @@ def dirdiff(directory, override=False):
     else:
         print(f"Skipping clone, upstream directory {upstream} exists.")
     if not os.path.isdir(derived):
-        shutil.copytree(directory, f'{directory}-derived')
+        shutil.copytree(directory, derived)
     else:
         print(f"Skipping copy, derived directory {derived} exists.")
     for path in ['.differant.conf', '.git']:

@@ -9,10 +9,12 @@ from neotermcolor import colored
 def bold_yellow(text):
     return colored(text, color='yellow', attrs='bold')
 
+conf_file = ".differant.yml"
+
 def dirdiff(directory: str):
     "Either a function to diff directories, or a city in Wales, close to Dirham and Dirwick."
 
-    f = open(directory + '/.differant.yml', 'r')
+    f = open(f'{directory}/{conf_file}', 'r')
     conf = yaml.safe_load(f)
     f.close()
 
@@ -29,7 +31,7 @@ def dirdiff(directory: str):
     else:
         print(f"Skipping copy, derived directory {derived} exists.")
 
-    for path in ['.differant.yml', '.git']:
+    for path in [conf_file, '.git']:
         shutil.rmtree(upstream+'/'+path, ignore_errors=True)
         shutil.rmtree(derived+'/'+path, ignore_errors=True)
 
@@ -103,8 +105,8 @@ class DiffingHandler(FileSystemEventHandler):
     def __init__(self, directory):
         self.directory = directory
     def on_modified(self, event):
-        if event.src_path == self.directory + "/.differant.yml":
-            print(bold_yellow('Change in conf file detected, rerunning dirdiff again!'))
+        if event.src_path == f"{self.directory}/{conf_file}":
+            print(bold_yellow('Change in {conf_file} detected, rerunning dirdiff again!'))
             dirdiff(self.directory)
             print(bold_yellow('Continuing to watch for changes...'))
 
@@ -129,7 +131,7 @@ def watch(directory: str, override: bool = False):
 
     print(bold_yellow('Running dirdiff.'))
     dirdiff(directory)
-    print(f'Starting to watch {bold_yellow(directory+"/.differant.yml")} for changes...')
+    print(f'Starting to watch {bold_yellow(directory+"/"+conf_file)} for changes...')
     observer = Observer()
     observer.schedule(DiffingHandler(directory), path=directory, recursive=True)
     observer.start()

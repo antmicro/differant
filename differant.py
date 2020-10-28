@@ -11,7 +11,6 @@ def dirdiff(directory: str):
     conf = yaml.safe_load(f)
     f.close()
 
-    print(conf)
     upstream = directory + '-upstream'
     derived = directory + '-derived'
     if not os.path.isdir(upstream):

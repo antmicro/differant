@@ -134,7 +134,7 @@ class DiffingHandler(FileSystemEventHandler):
             dirdiff(self.directory)
             print(bold_yellow('Continuing to watch for changes...'))
 
-def watch(directory: str, override: bool = False):
+def watch(directory: str, override: bool = False, interactive: bool = False):
 
     if not shutil.rmtree.avoids_symlink_attacks:
         print("Sorry, but your system is susceptible to symlink attacks. Consider switching. Exiting.")
@@ -155,16 +155,18 @@ def watch(directory: str, override: bool = False):
 
     print(bold_yellow('Running dirdiff.'))
     dirdiff(directory)
-    print(f'Starting to watch {bold_yellow(directory+"/"+conf_file)} for changes...')
-    observer = Observer()
-    observer.schedule(DiffingHandler(directory), path=directory, recursive=True)
-    observer.start()
-    try:
-        while True:
-            time.sleep(1)
-    finally:
-        observer.stop()
-        observer.join()
+
+    if interactive:
+        print(f'Starting to watch {bold_yellow(directory+"/"+conf_file)} for changes...')
+        observer = Observer()
+        observer.schedule(DiffingHandler(directory), path=directory, recursive=True)
+        observer.start()
+        try:
+            while True:
+                time.sleep(1)
+        finally:
+            observer.stop()
+            observer.join()
 
 if __name__ == "__main__":
 

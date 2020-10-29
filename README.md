@@ -16,7 +16,9 @@ Without the `--override` flag, if `DIRECTORY-upstream` and `DIRECTORY-derived` e
 
 Differant assumes that you run it from outside the DIRECTORY.
 
-By deault, it will perform a diff (taking into account the info from `.differant.yml`), print any diffs it cannot associate with a specific change listed in the conf file, and wait for changes of the conf file to re-run the diff (the point is to add to the conf file until you run out of ideas what he patches are about.
+By deault, it will perform a diff once (taking into account the info from `.differant.yml`), print any diffs it cannot associate with a specific change listed in the conf file.
+
+If the `--interactive` flag is provided, the program will wait for changes of the conf file to re-run the diff (the point is to add to the conf file until you run out of ideas what he patches are about.
 
 ## Conf file
 

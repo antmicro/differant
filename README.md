@@ -8,7 +8,9 @@ Work in progress, use at your own risk.
 
 ## Usage
 
+```
 ./differant.py DIRECTORY [--override]
+```
 
 Without the `--override` flag, if `DIRECTORY-upstream` and `DIRECTORY-derived` exist, the program skips the preparations phase and assumes the directories reflect the upstream and downstream code respectively. Using the flag deletes the directories first.
 

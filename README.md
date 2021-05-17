@@ -1,5 +1,7 @@
 # Differant
 
+Copyright (c) 2020-2021 [Antmicro](https://www.antmicro.com)
+
 A small library for diffing related codebases.
 
 Uses a `.differant.yml` file in YAML to highlight expected differences.

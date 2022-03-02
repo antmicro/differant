@@ -33,3 +33,27 @@ By default it's called `.differant.yml`. Currently it has the following sections
 ## TODO
 
 * in [issues](https://github.com/antmicro/differant/issues)
+
+## Changelogs tool
+
+The changelogs feature has for now been implemented as a separate file - `changelogs.py` - but metaphorically speaking it is solving a very similar problem to `differant`.
+
+### Usage
+
+Generate logs:
+
+```
+git log --pretty=format:"%C(yellow)%h%Creset | %C(cyan)%C(bold)%ad%Creset | %s" --date=format:'%Y-%m-%d,%H:%M:%S' > log_file
+```
+
+Run:
+
+```
+./changelogs.py parse-gitlogs log_file_1 log_file2 ... > changelog.yml
+```
+
+And then:
+
+```
+./changelogs.py print-changelog changelog.yml
+```

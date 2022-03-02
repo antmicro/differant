@@ -37,7 +37,7 @@ def parse_gitlogs(gitlogs):
     commits.sort(key=lambda c: datetime.strptime(c['date'], date_format))
 
     for c in commits:
-        changelog_yaml += f"  - {c['repo']} @ {c['ref']} {c['msg']}\n"
+        changelog_yaml += f"  - \"{c['repo']} @ {c['ref']} {c['msg']}\"\n"
     print(changelog_yaml)
 
 import yaml

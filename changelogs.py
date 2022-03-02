@@ -17,25 +17,27 @@ import argh
 
 date_format = '%Y-%m-%d,%H:%M:%S'
 
-# it should eventually be possible to just supply a list of repos
 @argh.arg('gitlogs', nargs='+', help='list of giltog files')
 def parse_gitlogs(gitlogs):
-    "Takes in n files as input, spits out a template changelog YAML."
+    "Takes in n .log files as input, spits out a template changelog YAML."
     changelog_yaml = template
     commits = []
     for gitlog in gitlogs:
+        import os.path
+        repo = os.path.splitext(gitlog)[0]
+
         with open(gitlog, 'r') as gl:
             commit_lines = gl.readlines()
             for c in commit_lines:
                 ref, datestr, msg = c.split(' | ')
-                commit = {'ref': ref, 'date': datestr, 'msg': msg.strip()}
+                commit = {'repo': repo, 'ref': ref, 'date': datestr, 'msg': msg.strip()}
                 commits += [commit]
 
     from datetime import datetime
     commits.sort(key=lambda c: datetime.strptime(c['date'], date_format))
 
     for c in commits:
-        changelog_yaml += f"  - {c['ref']} {c['msg']}\n"
+        changelog_yaml += f"  - {c['repo']} @ {c['ref']} {c['msg']}\n"
     print(changelog_yaml)
 
 import yaml

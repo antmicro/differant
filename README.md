@@ -45,16 +45,22 @@ The changelogs feature has for now been implemented as a separate file - `change
 Generate logs:
 
 ```
-git log --pretty=format:"%C(yellow)%h%Creset | %C(cyan)%C(bold)%ad%Creset | %s" --date=format:'%Y-%m-%d,%H:%M:%S' > log_file
+./git-helper.py log --commit-from={SHA} [--commit-to={SHA}] > changelog.yml
 ```
 
-Run:
+If you prefer to gather logs from various repositories and have them sorted by date, dump logs from each repo:
+
+```
+git log {SHA}..HEAD --pretty=format:"%C(yellow)%h%Creset | %C(cyan)%C(bold)%ad%Creset | %s" --date=format:'%Y-%m-%d,%H:%M:%S' > log_file
+```
+
+And then unify them with:
 
 ```
 ./changelogs.py parse-gitlogs log_file_1 log_file2 ... > changelog.yml
 ```
 
-And then:
+When you have the changelog.yml file ready, either via git-helper or via parse-gitlogs, organize listed commits according to your liking and run:
 
 ```
 ./changelogs.py print-changelog changelog.yml

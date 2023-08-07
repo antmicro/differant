@@ -51,7 +51,7 @@ def print_changelog(filename):
             for section in data:
                 # skip sections with no features in them
                 if data[section] is not None:
-                    print(f'{section}:')
+                    print(f'\n{section}:\n')
                     for feature in data[section]:
                         print(f'* {feature}')
                         if feature == 'Unclassified commits':
